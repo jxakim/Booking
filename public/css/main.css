@@ -1,0 +1,130 @@
+* {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* ------------------------------------------- Text ------------------------------------------------ */
+
+h1 {
+    font-family:  'Courier New', Courier, monospace;
+    font-size: 56px;
+    text-align: center;
+    font-weight: 50;
+}
+
+
+
+
+/* ------------------------------------------- Navbar ------------------------------------------------ */
+
+.navbar {
+    display: flex;
+    justify-content: center;
+}
+
+.navbar a {
+    margin: 0;
+    padding: 10px 50px;
+    font-size: 18px;
+    text-decoration: none;
+    color: black;
+    transition: ease-in .1s;
+}
+
+.navbar a:hover {
+    color: rgb(123, 123, 123);
+}
+
+#selected {
+    color: #33a9c0;
+}
+
+#selected:hover {
+    color: #2e879d;
+}
+
+
+/* ------------------------------------------- Options ------------------------------------------------ */
+
+.container {
+    display: flex;
+    justify-content: center;
+}
+
+.options {
+    margin: 40px 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.options h2 {
+    margin: 20px;
+}
+
+.options button {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    outline: none;
+}
+
+.options button:hover {
+    background-color: #0056b3;
+}
+
+
+/* ------------------------------------------- Dato design ------------------------------------------------ */
+
+input[type="date"] {
+    font-size: 14px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 150px;
+    box-sizing: border-box;
+    outline: none;
+}
+
+input[type="date"]:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* ------------------------------------------- Kart design ------------------------------------------------ */
+
+.plasser {
+    position: relative;
+    width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+  
+#kart {
+    display: inline-block;
+    width: 100%;
+    max-width: 100%;
+}
+  
+.plass {
+    position: absolute;
+    cursor: pointer;
+}
+
+.hover {
+    background-color: rgba(0, 255, 0, 0.2);
+}
+
+.selected {
+    background-color: rgba(0, 255, 0, .5);
+}
+
+.opptatt {
+    background-color: rgba(255, 0, 0, .43);
+}

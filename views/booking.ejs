@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/main.css">
+    <title>Booking</title>
+</head>
+<body>
+    <h1>Booking</h1>
+
+    <div class="navbar">
+        <a href="/" id="selected">Booking</a>
+        <a href="/dine_bookinger">Dine bookinger</a>
+        <a href="/logg_ut">Logg ut</a>
+    </div>
+
+    <div class="container">
+        <div class="options">
+            <h2>Book kontorplass</h2>
+            <button>Book valgt plass</button>
+            <p id="valgt-plass">Valgt plass: ingen</p>
+        </div>
+
+        <div class="options">
+            <h2>Velg dato</h2>
+            <input type="date" id="datePicker" name="datePicker" min="" max=""/>
+        </div>
+    </div>
+
+    <div class="plasser">
+        <img src="bilder/kart.jpg" id="kart">
+    </div>
+
+    <script src="js/kart.js"></script>
+
+    <script>
+        // Få tak i dagen i dag og sett den til dagen om 6 dager (fra i dag)
+        let currentDate = new Date();
+        currentDate.setDate(currentDate.getDate() + 6);
+
+        // Formater dem og sett max og min til 7 dager max og min til i dag
+        document.getElementById("datePicker").max = currentDate.toISOString().substr(0, 10);
+        document.getElementById("datePicker").min = new Date().toISOString().substr(0, 10);
+    </script>
+    
+</body>
+</html>
