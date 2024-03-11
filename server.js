@@ -41,9 +41,6 @@ app.get('/registrer', (req, res) => {
 });
 
 
-
-
-
 // Start serveren
 const port = 2000;
 

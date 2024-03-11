@@ -1,3 +1,15 @@
+// ------------------------------------------- Dato Konfigurering ------------------------------------------------- //
+
+// Få tak i dagen i dag og sett den til dagen om 6 dager (fra i dag)
+let currentDate = new Date();
+currentDate.setDate(currentDate.getDate() + 6);
+
+// Formater dem og sett max og min til 7 dager max og min til i dag
+document.getElementById("datePicker").max = currentDate.toISOString().substr(0, 10);
+document.getElementById("datePicker").min = new Date().toISOString().substr(0, 10);
+
+// --------------------------------------------------------------------------------------------- //
+
 let valgtPlass = null;
 
 // Lag plasser med egendefinert posisjon (x og y)
@@ -47,7 +59,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
     plasser.forEach(plass => {
         CREATE_Valgrute(plass);
-        // document.getElementById('Kontor-A').classList.add('opptatt');
     });
 });
 
