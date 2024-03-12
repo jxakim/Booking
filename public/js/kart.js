@@ -17,7 +17,12 @@ let valgtDato = document.getElementById("datePicker").value;
 datePicker.addEventListener('change', function() {
     valgtDato = this.value;
 
-    document.getElementById("kart").style.visibility = "hidden";
+    document.getElementById("kart").style.visibility = "visible";
+
+    plasser.forEach(entry => {
+        entry.opptatt = false;
+        console.log("Entry reset");
+    });
 
     UPDATE_Kart(valgtDato);
 });
@@ -72,11 +77,12 @@ const plasser = [
 
 document.addEventListener('DOMContentLoaded', function() {
     // Oppdater kartet
+    document.getElementById("kart").style.visibility = "hidden";
 });
 
 
 // Funksjon for å lage valgrutene
-function CREATE_Valgrute (plass) {
+function CREATE_Valgrute(plass) {
     const kart = document.getElementById('kart');
     const valgText = document.getElementById('valgt-plass');
 
@@ -95,8 +101,8 @@ function CREATE_Valgrute (plass) {
     if (plass.opptatt) {
         document.getElementById(plass.id).classList.add('opptatt');
     } else {
-        console.log("test");
         // Legg til lyttere så ruta reagerer når man hoverer over div elementet
+        document.getElementById(plass.id).classList.remove('opptatt');
 
         valgRute.addEventListener('mouseover', function() {
             valgRute.classList.add('hover');
@@ -132,6 +138,14 @@ function CREATE_Valgrute (plass) {
     }
 }
 
+function CREATE_Valgruter() {
+    // Her lager vi alle de valgrutene til kartet (logikken altså)
+    plasser.forEach(plass => {
+        console.log("Lager rute: " + plass.id);
+        CREATE_Valgrute(plass);
+    });
+}
+
 function UPDATE_Kart(dato) {
     // connect med databasen for å sjekke alle ledige plasser
     fetch('/ledige-plasser', {
@@ -144,19 +158,14 @@ function UPDATE_Kart(dato) {
     .then(response => response.json())
     .then(data => {
         data.result.forEach((i) => {
-            console.log(i.Navn);
+            const index = plasser.findIndex(entry => entry.id === i.Navn);
 
-            const entry = plasser.find(entry => entry.id === i.Navn);
-
-            if (entry) {
-                entry.opptatt = true;
+            if (index !== -1) {
+                plasser[index].opptatt = true;
             }
         });
+
+        CREATE_Valgruter();
     })
     .catch(error => console.error('Error:', error));
-
-    // Her lager vi alle de valgrutene til kartet (logikken altså)
-    plasser.forEach(plass => {
-        CREATE_Valgrute(plass);
-    });
 }
