@@ -19,6 +19,32 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(bodyParser.json());
 
+// DB Connection // ----------------------------------------------------------------- //
+
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'booking',
+});
+
+
+// Query function for queries
+function queryDb(sql, values) {
+  return new Promise((resolve, reject) => {
+    db.query(sql, values, (err, result) => {
+      if (err) reject(err);
+      resolve(result);
+    });
+  });
+}
+
+// Kobler til MySQL
+db.connect((err) => {
+  if (err) throw err;
+  console.log('Connected to MySQL database');
+});
+
 
 
 
@@ -40,6 +66,18 @@ app.get('/registrer', (req, res) => {
     res.render('konto/registrer');
 });
 
+
+// SQL Requests
+
+app.post('/ledige-plasser', async (req, res) => {
+  const dato = req.body.dato;
+  console.log('Received name from client:', dato);
+
+  const sql = "SELECT plasser.* FROM plasser INNER JOIN bookinger ON plasser.PlassID = bookinger.PlassID WHERE bookinger.Aktiv = true AND bookinger.dato = ?";
+  const result = await queryDb(sql, [req.body.dato]);
+ 
+  res.json({ result });
+});
 
 // Start serveren
 const port = 2000;
