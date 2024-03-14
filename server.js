@@ -105,7 +105,7 @@ app.route('/')
       const sql = 'SELECT * FROM brukerdata WHERE TRIM(Brukernavn) = ?';
       const bruker = await queryDb(sql, [brukernavn]);
 
-      if (bruker.length === 1) {
+      if (bruker) {
         const passord_compare = await bcrypt.compare(passord, bruker[0].Hashed_Passord);
 
         if (passord_compare) {
@@ -128,14 +128,59 @@ app.route('/')
     }
   });
 
+
+
 app.get('/dine_bookinger', (req, res) => {
     res.render('dine_bookinger');
 });
 
-app.route('/login')
+app.route('/registrer')
   .get(async (req, res) => {
-    res.render('/', { message: null });
+    res.render('konto/registrer', { message: null });
   })
+
+  .post(async (req, res) => {
+    try {
+
+      const { navn, brukernavn, passord, gjenta_passord } = req.body;
+
+      // Krypter passordet
+      const hash_passord = await bcrypt.hash(passord, 10);
+
+      if (passord == gjenta_passord) {
+        const sql1 = 'SELECT * FROM brukerdata WHERE Brukernavn LIKE ?';
+        const result1 = await queryDb(sql1, [brukernavn]);
+
+        if (result1) {
+          const sql2 = 'INSERT INTO brukerdata (Navn, Brukernavn, Hashed_Passord) VALUES (?, ?, ?)';
+          const result2 = await queryDb(sql2, [navn, brukernavn, hash_passord]);
+
+          if (result2) {
+
+            const cookie_tid_minutter = 5;
+            res.cookie('loggedin', true, { maxAge: cookie_tid_minutter * 60 * 1000, httpOnly: true });
+            res.cookie('bruker', brukernavn, { maxAge: cookie_tid_minutter * 60 * 1000, httpOnly: true });
+
+            res.render('booking', { message: 'Du er nå registrert.' });
+          } else {
+            res.render('konto/registrer', { message: 'Noe feil skjedde under registrering' });
+          }
+
+        } else {
+          res.render('konto/registrer', { message: 'En bruker med dette brukernavnet finnes allerede.' });
+        }
+      }
+
+    } catch (error) {
+      console.error('Error during login process:', error);
+      res.render('konto/registrer', { message: 'Noe feil skjedde under registrering.' });
+    }
+  });
+
+
+app.get('/logg-inn', async (req, res) => {
+  res.render('konto/logg_inn', { message: null });
+})
 
 app.get('/registrer', (req, res) => {
     res.render('konto/registrer');
@@ -156,7 +201,7 @@ app.post('/book-plass', async (req, res) => {
   const [BrukerId, PlassID, dato] = req.body.dato;
 
   const sql = "INSERT INTO bookinger (BrukerID, PlassID, Dato, Aktiv) values (?, ?, ?, ?)";
-  const result = await queryDb(sql, (BrukerID, PlassID, dato, true));
+  const result = await queryDb(sql, (BrukerId, PlassID, dato, true));
  
   res.json({ result });
 });
