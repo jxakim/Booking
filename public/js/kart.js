@@ -11,7 +11,6 @@ document.getElementById("datePicker").min = new Date().toISOString().substr(0, 1
 // --------------------------------------------------------------------------------------------- //
 
 const datePicker = document.getElementById("datePicker");
-
 let valgtDato = document.getElementById("datePicker").value;
 
 datePicker.addEventListener('change', function() {
@@ -19,14 +18,12 @@ datePicker.addEventListener('change', function() {
 
     document.getElementById("kart").style.visibility = "visible";
 
-    plasser.forEach(entry => {
-        entry.opptatt = false;
-        console.log("Entry reset");
-    });
-
     UPDATE_Kart(valgtDato);
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById("kart").style.visibility = "hidden";
+});
 
 
 let valgtPlass = null;
@@ -74,12 +71,34 @@ const plasser = [
 ];
 
 
+// get cookie funksjon fra w3schools https://www.w3schools.com/js/js_cookies.asp
+function GET_Cookie(navn) {
+    let name = navn + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for(let i = 0; i <ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+}
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Oppdater kartet
-    document.getElementById("kart").style.visibility = "hidden";
-});
 
+function RESET_plasser() {
+    plasser.forEach(plass => {
+        plass.opptatt = false;
+    });
+
+    const valgruter = document.querySelectorAll('.plass');
+    valgruter.forEach(rute => {
+        rute.remove();
+    });
+}
 
 // Funksjon for å lage valgrutene
 function CREATE_Valgrute(plass) {
@@ -102,7 +121,6 @@ function CREATE_Valgrute(plass) {
         document.getElementById(plass.id).classList.add('opptatt');
     } else {
         // Legg til lyttere så ruta reagerer når man hoverer over div elementet
-        document.getElementById(plass.id).classList.remove('opptatt');
 
         valgRute.addEventListener('mouseover', function() {
             valgRute.classList.add('hover');
@@ -141,14 +159,15 @@ function CREATE_Valgrute(plass) {
 function CREATE_Valgruter() {
     // Her lager vi alle de valgrutene til kartet (logikken altså)
     plasser.forEach(plass => {
-        console.log("Lager rute: " + plass.id);
         CREATE_Valgrute(plass);
     });
 }
 
 function UPDATE_Kart(dato) {
+    RESET_plasser();
+
     // connect med databasen for å sjekke alle ledige plasser
-    fetch('/ledige-plasser', {
+    fetch('/get-ledige-plasser', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -166,6 +185,26 @@ function UPDATE_Kart(dato) {
         });
 
         CREATE_Valgruter();
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function BOOK_Plass(plass, dato) {
+    const brukerid = GET_Cookie("bruker");
+
+    fetch('/book-plass', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ BrukerID: brukerid, PlassID: (plass.id).split("-")[1], dato: dato })
+    })
+    .then(response => {
+        if (response.ok) {
+            UPDATE_Kart(dato)
+        } else {
+            console.error('Feil under booking av plass.');
+        }
     })
     .catch(error => console.error('Error:', error));
 }
