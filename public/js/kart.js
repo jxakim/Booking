@@ -13,19 +13,6 @@ document.getElementById("datePicker").min = new Date().toISOString().substr(0, 1
 const datePicker = document.getElementById("datePicker");
 let valgtDato = document.getElementById("datePicker").value;
 
-datePicker.addEventListener('change', function() {
-    valgtDato = this.value;
-
-    document.getElementById("kart").style.visibility = "visible";
-
-    UPDATE_Kart(valgtDato);
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById("kart").style.visibility = "hidden";
-});
-
-
 let valgtPlass = null;
 
 // Lag plasser med egendefinert posisjon (x og y)
@@ -70,26 +57,36 @@ const plasser = [
 
 ];
 
+// ------------------------------------------- Event Listeners ------------------------------------------------- //
 
-// get cookie funksjon fra w3schools https://www.w3schools.com/js/js_cookies.asp
-function GET_Cookie(navn) {
-    let name = navn + "=";
-    let decodedCookie = decodeURIComponent(document.cookie);
-    let ca = decodedCookie.split(';');
-    for(let i = 0; i <ca.length; i++) {
-      let c = ca[i];
-      while (c.charAt(0) == ' ') {
-        c = c.substring(1);
-      }
-      if (c.indexOf(name) == 0) {
-        return c.substring(name.length, c.length);
-      }
+
+book_knapp.addEventListener('click', function() {
+    plassid = document.getElementById("valgt-plass").textContent.split(" ")[2];
+    if (plassid != "ingen") {
+        BOOK_Plass(plassid, valgtDato);
     }
-    return "";
-}
+});
 
+datePicker.addEventListener('change', function() {
+    valgtDato = this.value;
 
+    UPDATE_Kart(valgtDato, "");
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById("melding").style.color = "orange";
+    document.getElementById("melding").textContent = "Velg en dato for å booke.";
+    document.getElementById("kart").style.visibility = "hidden";
+});
+
+// ------------------------------------------- Funskjoner ------------------------------------------------- //
+
+// Funksjon som resetter valgrutene sine dataer (klasser)
 function RESET_plasser() {
+    document.getElementById('valgt-plass').textContent = "Valgt plass: ingen";
+    document.getElementById("melding").textContent = "";
+    document.getElementById("melding").style.color = "red";
+
     plasser.forEach(plass => {
         plass.opptatt = false;
     });
@@ -100,7 +97,7 @@ function RESET_plasser() {
     });
 }
 
-// Funksjon for å lage valgrutene
+// Funksjon for laging av en valgrute
 function CREATE_Valgrute(plass) {
     const kart = document.getElementById('kart');
     const valgText = document.getElementById('valgt-plass');
@@ -156,6 +153,7 @@ function CREATE_Valgrute(plass) {
     }
 }
 
+// Funksjon for å løkke igjennom og lage alle rutene
 function CREATE_Valgruter() {
     // Her lager vi alle de valgrutene til kartet (logikken altså)
     plasser.forEach(plass => {
@@ -163,48 +161,92 @@ function CREATE_Valgruter() {
     });
 }
 
-function UPDATE_Kart(dato) {
-    RESET_plasser();
+// Denne funksjonen oppdaterer kartet basert på dato knyttet opp mot databasen
+async function UPDATE_Kart(dato, positive_response) {
+    const har_booket = await GET_Bruker_Booket(dato);
 
-    // connect med databasen for å sjekke alle ledige plasser
-    fetch('/get-ledige-plasser', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ dato: dato })
-    })
-    .then(response => response.json())
-    .then(data => {
-        data.result.forEach((i) => {
-            const index = plasser.findIndex(entry => entry.id === i.Navn);
+    if (har_booket) {
+        RESET_plasser();
+        document.getElementById("kart").style.visibility = "hidden";
 
-            if (index !== -1) {
-                plasser[index].opptatt = true;
-            }
-        });
+        if (positive_response == "") {
+            document.getElementById("melding").textContent = "Du har allerede booket en plass for denne dagen. Sjekk dine bookinger siden for å avbooke.";
+        } else {
+            document.getElementById("melding").style.color = "lightgreen";
+            document.getElementById("melding").textContent = positive_response;
+        }
+    } else {
+        document.getElementById("melding").textContent = "";
+        document.getElementById("kart").style.visibility = "visible";
 
-        CREATE_Valgruter();
-    })
-    .catch(error => console.error('Error:', error));
+        RESET_plasser();
+
+        // connect med databasen for å sjekke alle ledige plasser
+        fetch('/get-ledige-plasser', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ dato: dato })
+        })
+        .then(response => response.json())
+        .then(data => {
+            data.result.forEach((i) => {
+                const index = plasser.findIndex(entry => entry.id === i.Navn);
+
+                if (index !== -1) {
+                    plasser[index].opptatt = true;
+                }
+            });
+
+            CREATE_Valgruter();
+        })
+        .catch(error => console.error('Error:', error));
+    }
 }
 
-function BOOK_Plass(plass, dato) {
-    const brukerid = GET_Cookie("bruker");
-
+// Funksjon for å registrere en booking opp mot databasen
+function BOOK_Plass(plassid, dato) {
     fetch('/book-plass', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ BrukerID: brukerid, PlassID: (plass.id).split("-")[1], dato: dato })
+        body: JSON.stringify({ PlassID: plassid.split("-")[1], dato: dato })
     })
     .then(response => {
         if (response.ok) {
-            UPDATE_Kart(dato)
+            UPDATE_Kart(dato, "Plass booket! Se dine bookinger for å administrere.");
         } else {
             console.error('Feil under booking av plass.');
         }
     })
     .catch(error => console.error('Error:', error));
 }
+
+// Funksjon for å sjekke opp med database om brukeren har allerede booket for en dato
+function GET_Bruker_Booket(dato) {
+    return new Promise((resolve, reject) => {
+        fetch('/sjekk-bruker-booket', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ Dato: dato })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            resolve(data.har_booket); // Resolve with true or false
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            reject(error); // Reject the promise in case of error
+        });
+    });
+}
+

@@ -54,11 +54,9 @@ async function Validate(req, res, route, redirect) {
   const cookieExists = req.cookies.loggedin;
 
   if (cookieExists) {
-    const brukernavn = req.cookies.brukernavn;
-
-    try {
+    try { 
       if (redirect) {
-          res.render(route, {brukernavn, message: null});
+          res.render(route, { message: null });
       } else {
         return true;
       }
@@ -67,7 +65,7 @@ async function Validate(req, res, route, redirect) {
       res.render('konto/logg_inn', { message: 'Det skjedde en feil ved innlogging.' });
     }
   } else {
-    res.render('konto/logg_inn', { message: null });
+    End_Session(req, res)
   }
 }
 
@@ -75,9 +73,9 @@ async function Validate(req, res, route, redirect) {
 function End_Session(req, res) {
   // Clear cookies
   res.clearCookie('loggedin');
-  res.clearCookie('brukernavn');
+  res.clearCookie('bruker');
 
-  res.render('/', { message: 'Du logget ut.' });
+  res.render('konto/logg_inn', { message: 'Du ble logget ut.' });
 }
 
 
@@ -87,19 +85,12 @@ function End_Session(req, res) {
 
 app.route('/')
   .get(async (req, res) => {
-    const cookieExists = req.cookies.loggedin;
-    if (cookieExists) {
-      console.log("Cookie eksisterer");
       Validate(req, res, 'booking', true);
-    } else {
-      res.render('konto/logg_inn', { message: null });
-    }
   })
 
 
   .post(async (req, res) => {
     try {
-
       const { brukernavn, passord } = req.body;
 
       const sql = 'SELECT * FROM brukerdata WHERE TRIM(Brukernavn) = ?';
@@ -110,11 +101,11 @@ app.route('/')
 
         if (passord_compare) {
 
-          const cookie_tid_minutter = 5;
+          const cookie_tid_minutter = 1;
           res.cookie('loggedin', true, { maxAge: cookie_tid_minutter * 60 * 1000, httpOnly: true });
           res.cookie('bruker', brukernavn, { maxAge: cookie_tid_minutter * 60 * 1000, httpOnly: true });
 
-          res.render('booking', { brukernavn, message:'Velkommen!' });
+          res.render('booking', { message: null });
         } else {
           res.render('konto/logg_inn', { message: 'Feil passord.' });
         }
@@ -131,7 +122,7 @@ app.route('/')
 
 
 app.get('/dine_bookinger', (req, res) => {
-    res.render('dine_bookinger');
+    Validate(req, res, 'dine_bookinger', true);
 });
 
 app.route('/registrer')
@@ -157,7 +148,7 @@ app.route('/registrer')
 
           if (result2) {
 
-            const cookie_tid_minutter = 5;
+            const cookie_tid_minutter = 1;
             res.cookie('loggedin', true, { maxAge: cookie_tid_minutter * 60 * 1000, httpOnly: true });
             res.cookie('bruker', brukernavn, { maxAge: cookie_tid_minutter * 60 * 1000, httpOnly: true });
 
@@ -182,38 +173,54 @@ app.get('/logg-inn', async (req, res) => {
   res.render('konto/logg_inn', { message: null });
 })
 
+app.get('/logg-ut', (req, res) => {
+  End_Session(req, res);
+});
+
 app.get('/registrer', (req, res) => {
-    res.render('konto/registrer');
+    res.render('konto/registrer', { message: null });
 });
 
 
 // SQL Requests
 
 app.post('/get-ledige-plasser', async (req, res) => {
+  if (Validate(req, res, '', false)) {
+    const sql = "SELECT plasser.* FROM plasser INNER JOIN bookinger ON plasser.PlassID = bookinger.PlassID WHERE bookinger.Aktiv = true AND bookinger.dato = ?";
+    const result = await queryDb(sql, [req.body.dato]);
 
-  const sql = "SELECT plasser.* FROM plasser INNER JOIN bookinger ON plasser.PlassID = bookinger.PlassID WHERE bookinger.Aktiv = true AND bookinger.dato = ?";
-  const result = await queryDb(sql, [req.body.dato]);
- 
-  res.json({ result });
+    res.json({ result });
+  }
 });
 
 app.post('/book-plass', async (req, res) => {
-  const [BrukerId, PlassID, dato] = req.body.dato;
+  if (Validate(req, res, '', false)) {
+    const { PlassID, dato } = req.body;
+    const Brukernavn = req.cookies.bruker;
 
-  const sql = "INSERT INTO bookinger (BrukerID, PlassID, Dato, Aktiv) values (?, ?, ?, ?)";
-  const result = await queryDb(sql, (BrukerId, PlassID, dato, true));
- 
-  res.json({ result });
+    const sql = "INSERT INTO bookinger (Brukernavn, PlassID, Dato, Aktiv) values (?, ?, ?, ?)";
+    const result = await queryDb(sql, [ Brukernavn, PlassID, dato, true ]);
+   
+    res.json({ result });
+  }
 });
 
-app.post('/get-plasser', async (req, res) => {
-  
-  const sql = "SELECT * FROM PLASSER";
-  const result = await queryDb(sql);
 
-  res.json({result: result})
-})
+app.post('/sjekk-bruker-booket', async (req, res) => {
+  if (Validate(req, res, '', false)) {
+    const { Dato } = req.body;
+    const Brukernavn = req.cookies.bruker;
 
+    const sql = "SELECT * FROM bookinger WHERE Brukernavn = ? AND Dato = ? AND Aktiv = ?";
+    const result = await queryDb(sql, [ Brukernavn, Dato, true ]);
+
+    if (result.length > 0) {
+      res.json({har_booket: true});
+    } else {
+      res.json({har_booket: false});
+    }
+  }
+});
 
 
 

@@ -99,17 +99,3 @@ a:hover {
     margin-top: 15px;
     font-size: 14px;
 }
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-/* Apply animation to elements */
-body {
-    animation: fadeIn 1.5s ease-out;
-}
