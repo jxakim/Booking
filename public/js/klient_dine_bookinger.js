@@ -55,7 +55,7 @@ async function GET_Bookinger() {
     });
 }
 
-// Avbooking
+// Avbooking funksjon
 
 function Avbook(plass) {
     const plassID = plass;

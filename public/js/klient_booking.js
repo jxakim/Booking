@@ -8,8 +8,9 @@ currentDate.setDate(currentDate.getDate() + 6);
 document.getElementById("datePicker").max = currentDate.toISOString().substr(0, 10);
 document.getElementById("datePicker").min = new Date().toISOString().substr(0, 10);
 
-// -------------------------------------------- Options ------------------------------------------------ //
+// -------------------------------------------- Declaring og instillinger ------------------------------------------------ //
 
+// Dato variabler
 const datePicker = document.getElementById("datePicker");
 let valgtDato = document.getElementById("datePicker").value;
 
@@ -59,7 +60,7 @@ const plasser = [
 
 // ------------------------------------------- Event Listeners ------------------------------------------------- //
 
-
+// Lytter til om book knappen blir trykket på
 book_knapp.addEventListener('click', function() {
     plassid = document.getElementById("valgt-plass").textContent.split(" ")[2];
     if (plassid != "ingen") {
@@ -67,12 +68,14 @@ book_knapp.addEventListener('click', function() {
     }
 });
 
+// Lytter til da dato elementet blir endret 
 datePicker.addEventListener('change', function() {
     valgtDato = this.value;
 
     UPDATE_Kart(valgtDato, "");
 });
 
+// Første gang siden loader
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("melding").style.color = "orange";
     document.getElementById("melding").textContent = "Velg en dato for å booke.";
