@@ -101,7 +101,7 @@ app.route('/')
 
         if (passord_compare) {
 
-          const cookie_tid_minutter = 1;
+          const cookie_tid_minutter = 5;
           res.cookie('loggedin', true, { maxAge: cookie_tid_minutter * 60 * 1000, httpOnly: true });
           res.cookie('bruker', brukernavn, { maxAge: cookie_tid_minutter * 60 * 1000, httpOnly: true });
 
@@ -148,7 +148,7 @@ app.route('/registrer')
 
           if (result2) {
 
-            const cookie_tid_minutter = 1;
+            const cookie_tid_minutter = 5;
             res.cookie('loggedin', true, { maxAge: cookie_tid_minutter * 60 * 1000, httpOnly: true });
             res.cookie('bruker', brukernavn, { maxAge: cookie_tid_minutter * 60 * 1000, httpOnly: true });
 
@@ -205,6 +205,19 @@ app.post('/book-plass', async (req, res) => {
   }
 });
 
+app.post('/avbook-plass', async (req, res) => {
+  if (Validate(req, res, '', false)) {
+    const { PlassID } = req.body;
+
+    const sql = "DELETE FROM bookinger WHERE PlassID LIKE ?";
+    const result = await queryDb(sql, [ PlassID ]);
+    
+    if (result) {
+      res.json({ result });
+    }
+  }
+});
+
 
 app.post('/sjekk-bruker-booket', async (req, res) => {
   if (Validate(req, res, '', false)) {
@@ -221,6 +234,17 @@ app.post('/sjekk-bruker-booket', async (req, res) => {
     }
   }
 });
+
+// Assuming you have Express.js set up
+app.post('/get-alle-bookinger', async(req, res) => {
+  const Brukernavn = req.cookies.bruker;
+
+  const sql = "SELECT * FROM bookinger WHERE brukernavn LIKE ?";
+  const result = await queryDb(sql, [ Brukernavn ]);
+
+  res.json({bookinger: result});
+});
+
 
 
 

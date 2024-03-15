@@ -128,3 +128,56 @@ input[type="date"]:focus {
 .opptatt {
     background-color: rgba(255, 0, 0, .43);
 }
+
+
+/* ------------------------------------------- Dine bookinger design ------------------------------------------------ */
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    width: 80%;
+    margin: 0 auto;
+    margin-top: 30px;
+}
+
+.grid > div {
+    background-color: #f0f0f0;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+.booking-element {
+    text-align: center;
+    background-color: #747474;
+    padding: 10px;
+    border: 1px solid #ccc;
+    width: 200px;
+    height: 120px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.booking-element h2 {
+    margin-top: 10px;
+    font-size: 18px;
+}
+
+.booking-element p {
+    margin: 0;
+    font-size: 14px;
+}
+
+.booking-element a {
+    text-decoration: none;
+    color: red;
+    display: inline-block;
+    padding: 4px 8px;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: color 0.1s;
+}
+
+.booking-element a:hover {
+    color: #9c0000; /* Change text color on hover */
+}

@@ -8,7 +8,7 @@ currentDate.setDate(currentDate.getDate() + 6);
 document.getElementById("datePicker").max = currentDate.toISOString().substr(0, 10);
 document.getElementById("datePicker").min = new Date().toISOString().substr(0, 10);
 
-// --------------------------------------------------------------------------------------------- //
+// -------------------------------------------- Options ------------------------------------------------ //
 
 const datePicker = document.getElementById("datePicker");
 let valgtDato = document.getElementById("datePicker").value;
