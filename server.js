@@ -20,7 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(bodyParser.json());
 
-// DB Connection // ----------------------------------------------------------------- //
+// ---------------------------------------------- Database Kobling ---------------------------------------------- //
 
 const db = mysql.createConnection({
   host: 'localhost',
@@ -29,8 +29,12 @@ const db = mysql.createConnection({
   database: 'booking',
 });
 
+// Koble til MySQL
+db.connect((err) => { if (err) throw err });
 
-// Query function for queries
+// ---------------------------------------------- Funksjoner ---------------------------------------------- //
+
+// SQL Query håndtering
 function queryDb(sql, values) {
   return new Promise((resolve, reject) => {
     db.query(sql, values, (err, result) => {
@@ -39,14 +43,6 @@ function queryDb(sql, values) {
     });
   });
 }
-
-// Kobler til MySQL
-db.connect((err) => {
-  if (err) throw err;
-  console.log('Connected to MySQL database');
-});
-
-// Innholdsfunksjoner // ------------------------------------------------------ //
 
 // Validasjon av bruker
 async function Validate(req, res, route, redirect) {
@@ -69,7 +65,7 @@ async function Validate(req, res, route, redirect) {
   }
 }
 
-// End the session
+// End Sesjonen (logg ut)
 function End_Session(req, res) {
   // Clear cookies
   res.clearCookie('loggedin');
@@ -78,17 +74,15 @@ function End_Session(req, res) {
   res.render('konto/logg_inn', { message: 'Du ble logget ut.' });
 }
 
+// ---------------------------------------------- Innhold ---------------------------------------------- //
 
-
-
-// Innhold // ----------------------------------------------------------------- //
-
+// Index route
 app.route('/')
   .get(async (req, res) => {
       Validate(req, res, 'booking', true);
   })
 
-
+  // Login post
   .post(async (req, res) => {
     try {
       const { brukernavn, passord } = req.body;
@@ -119,17 +113,20 @@ app.route('/')
     }
   });
 
-
-
+// Dine bookinger route
 app.get('/dine_bookinger', (req, res) => {
     Validate(req, res, 'dine_bookinger', true);
 });
 
+// --------- KONTO --------- //
+
+// Registrering route
 app.route('/registrer')
   .get(async (req, res) => {
     res.render('konto/registrer', { message: null });
   })
 
+  // Registrering post
   .post(async (req, res) => {
     try {
 
@@ -168,22 +165,20 @@ app.route('/registrer')
     }
   });
 
-
+// Logg inn route
 app.get('/logg-inn', async (req, res) => {
   res.render('konto/logg_inn', { message: null });
 })
 
+// Logg ut 
 app.get('/logg-ut', (req, res) => {
   End_Session(req, res);
 });
 
-app.get('/registrer', (req, res) => {
-    res.render('konto/registrer', { message: null });
-});
 
+// ---------------------------------------------- SQL Requests ---------------------------------------------- //
 
-// SQL Requests
-
+// Request som får tak i alle ledige plasser for en dato
 app.post('/get-ledige-plasser', async (req, res) => {
   if (Validate(req, res, '', false)) {
     const sql = "SELECT plasser.* FROM plasser INNER JOIN bookinger ON plasser.PlassID = bookinger.PlassID WHERE bookinger.Aktiv = true AND bookinger.dato = ?";
@@ -193,6 +188,7 @@ app.post('/get-ledige-plasser', async (req, res) => {
   }
 });
 
+// Request som booker en plass
 app.post('/book-plass', async (req, res) => {
   if (Validate(req, res, '', false)) {
     const { PlassID, dato } = req.body;
@@ -205,6 +201,7 @@ app.post('/book-plass', async (req, res) => {
   }
 });
 
+// Request som avbooker enplass
 app.post('/avbook-plass', async (req, res) => {
   if (Validate(req, res, '', false)) {
     const { PlassID } = req.body;
@@ -218,7 +215,7 @@ app.post('/avbook-plass', async (req, res) => {
   }
 });
 
-
+// Sjekker om brukeren har booket på en plass før
 app.post('/sjekk-bruker-booket', async (req, res) => {
   if (Validate(req, res, '', false)) {
     const { Dato } = req.body;
@@ -235,20 +232,21 @@ app.post('/sjekk-bruker-booket', async (req, res) => {
   }
 });
 
-// Assuming you have Express.js set up
+// Request som får alle plasser som en bruker har booket
 app.post('/get-alle-bookinger', async(req, res) => {
-  const Brukernavn = req.cookies.bruker;
+  if (Validate(req, res, '', false)) {
+    const Brukernavn = req.cookies.bruker;
 
-  const sql = "SELECT * FROM bookinger WHERE brukernavn LIKE ?";
-  const result = await queryDb(sql, [ Brukernavn ]);
+    const sql = "SELECT * FROM bookinger WHERE brukernavn LIKE ?";
+    const result = await queryDb(sql, [ Brukernavn ]);
 
-  res.json({bookinger: result});
+    res.json({bookinger: result});
+  }
 });
 
+// ---------------------------------------------- Siste server håndteringer ---------------------------------------------- //
 
-
-
-// Start serveren
+// Start serveren med port 2000 (kan endres)
 const port = 2000;
 
 app.listen(port, () => {
