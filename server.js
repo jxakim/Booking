@@ -71,7 +71,7 @@ function End_Session(req, res) {
   res.clearCookie('loggedin');
   res.clearCookie('bruker');
 
-  res.render('konto/logg_inn', { message: 'Du ble logget ut.' });
+  res.render('konto/logg_inn', { message: null });
 }
 
 // ---------------------------------------------- Innhold ---------------------------------------------- //
