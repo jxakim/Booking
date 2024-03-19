@@ -244,6 +244,18 @@ app.post('/get-alle-bookinger', async(req, res) => {
   }
 });
 
+// Request som får alle plasser som en bruker har booket
+app.post('/get-plass-info', async(req, res) => {
+  if (Validate(req, res, '', false)) {
+    const { PlassID } = req.body;
+
+    const sql = "select Skjerm,Tastatur,Mus from plasser where PlassID = ?";
+    const result = await queryDb(sql, [ PlassID ]);
+
+    res.json({info: result});
+  }
+});
+
 // ---------------------------------------------- Siste server håndteringer ---------------------------------------------- //
 
 // Start serveren med port 2000 (kan endres)

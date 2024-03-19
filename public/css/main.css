@@ -153,7 +153,7 @@ input[type="date"]:focus {
     padding: 10px;
     border: 1px solid #ccc;
     width: 200px;
-    height: 120px;
+    height: auto;
     box-sizing: border-box;
     overflow: hidden;
 }
