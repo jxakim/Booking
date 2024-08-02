@@ -8,6 +8,11 @@ NB! Dette kan IKKE brukes som det er nå til faktiske bedrifter. Om du skal dett
 Dette er bare en demo av en simpel bookingside. Den mangler et par sikkerhetstiltak og andre nødvendige punkter som en side trenger. 
 
 
+
+
+
+| Databasen følger ikke med som er en ulempe, derfor vil ikke siden fungere helt som den skal. Jeg mangler databasen og skal se om jeg gidder å lage ny senere.
+
 ---------------------------------------------------------------------------------------------------
 
 Hvordan kan du bruke?
