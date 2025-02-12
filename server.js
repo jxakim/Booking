@@ -25,7 +25,7 @@ app.use(bodyParser.json());
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: '',
+  password: 'joakim06',
   database: 'booking',
 });
 
@@ -56,7 +56,6 @@ async function Validate(req, res, route, redirect) {
       } else {
         return true;
       }
-        
     } catch (error) {
       res.render('konto/logg_inn', { message: 'Det skjedde en feil ved innlogging.' });
     }

@@ -24,3 +24,65 @@ Hvordan kan du bruke?
 5. Deretter går du til nettleseren din og skriver inn "localhost:2000" og så vil du få opp siden.
 
 ---------------------------------------------------------------------------------------------------
+
+
+---------------------------------------------------------------------------------------------------
+
+SQL Kode:
+
+
+!! Dette er for å legge inn tables !!
+
+CREATE DATABASE IF NOT EXISTS booking;
+USE booking;
+
+CREATE TABLE IF NOT EXISTS brukerdata (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    Navn VARCHAR(100) NOT NULL,
+    Brukernavn VARCHAR(50) NOT NULL UNIQUE,
+    Hashed_Passord VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS plasser (
+    PlassID INT AUTO_INCREMENT PRIMARY KEY,
+    Skjerm BOOLEAN DEFAULT FALSE,
+    Tastatur BOOLEAN DEFAULT FALSE,
+    Mus BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE IF NOT EXISTS bookinger (
+    BookingID INT AUTO_INCREMENT PRIMARY KEY,
+    Brukernavn VARCHAR(50) NOT NULL,
+    PlassID INT NOT NULL,
+    Dato DATE NOT NULL,
+    Aktiv BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (Brukernavn) REFERENCES brukerdata(Brukernavn) ON DELETE CASCADE,
+    FOREIGN KEY (PlassID) REFERENCES plasser(PlassID) ON DELETE CASCADE
+);
+
+
+
+
+
+!! Dette er for å legge til plassene !!
+
+INSERT INTO plasser (PlassID, Skjerm, Tastatur, Mus) VALUES
+(1, FALSE, FALSE, FALSE),
+(2, FALSE, FALSE, FALSE),
+(3, FALSE, FALSE, FALSE),
+(4, FALSE, FALSE, FALSE),
+(5, FALSE, FALSE, FALSE),
+(6, FALSE, FALSE, FALSE),
+(7, FALSE, FALSE, FALSE),
+(8, FALSE, FALSE, FALSE),
+(9, FALSE, FALSE, FALSE),
+(10, FALSE, FALSE, FALSE),
+(11, FALSE, FALSE, FALSE),
+(12, FALSE, FALSE, FALSE),
+(13, FALSE, FALSE, FALSE),
+(14, FALSE, FALSE, FALSE),
+(15, FALSE, FALSE, FALSE),
+(16, FALSE, FALSE, FALSE),
+(17, FALSE, FALSE, FALSE),
+(18, FALSE, FALSE, FALSE),
+(19, FALSE, FALSE, FALSE);
